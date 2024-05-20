@@ -1,11 +1,10 @@
-
 import os
 from openai import OpenAI
 import requests
 import base64
 
-
 client = OpenAI()
+
 
 def image_bytes_to_base64(image_bytes):
     """
@@ -130,8 +129,8 @@ def encode_image_to_base64(image_path):
 
 
 def table_to_text(table=None, prompt="describe this table in plain text. "
-                   "be as precise as possible. spare no detail. "
-                   "what is in this table?", print_out=True):
+                                     "be as precise as possible. spare no detail. "
+                                     "what is in this table?", print_out=True):
     if table is not None:
         response = gpt4_new(f"{prompt} TABLE: {table}")
         if print_out:
@@ -147,6 +146,4 @@ if __name__ == "__main__":
     #img_to_text(img_base64=encode_image_to_base64("skier.png"))
     #print(image_to_base64("skier.png"))
     #print(vectorize_data("test string"))
-
-    print(gpt4_new())
-
+    print(gpt4_new(input()))
