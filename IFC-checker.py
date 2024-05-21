@@ -36,7 +36,7 @@ def compare_ifc_models(model1, model2):
     return similarity
 
 
-def clean_ifc(ifc_file_path: str, printout=False):
+def clean_ifc(ifc_file_path, printout=False):
     """
     Clean an IFC file by creating a new IFC file that contains only one instance
     of each specified element type, preserving their attributes and property sets.
