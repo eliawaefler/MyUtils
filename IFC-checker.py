@@ -38,37 +38,33 @@ def compare_ifc_models(model1, model2):
 
 def clean_ifc(ifc_file_path, printout=False):
     """
-    Clean an IFC file by creating a new IFC file that contains only one instance
-    of each specified element type, preserving their attributes and property sets.
-
+    Bereinigt ein IFC, indem es nur eine Instanz pro Typ zulässt. alle Psets und Attribute bleiben dem Typ zugeordnet.
+    
+    
     Parameters:
-    ifc_file_path (str): Path to the input IFC file.
-    printout (bool): Whether to print out debug information.
+    ifc_file_path (str): Pfad zum IFC-file
+    printout (bool): Debug Informationen ausgeben oder nicht
 
     Returns:
-    ifcopenshell.file: A new IFC model containing one instance of each specified element type.
+    ifcopenshell.file: neues IFC model welches nur eine Instanz von jedem Typ hat.
     """
     try:
-        # Open the IFC file
         ifc_model = ifcopenshell.open(ifc_file_path)
-
-        # Create a new empty IFC file
         new_ifc_model = ifcopenshell.file()
 
-        # Add the necessary header information
+        # header
         for entity in ifc_model.by_type('IfcProject'):
             new_ifc_model.createIfcProject(
                 entity.GlobalId, entity.OwnerHistory, entity.Name, entity.Description,
                 entity.ObjectType, entity.LongName, entity.Phase
             )
 
-        # Define the types to keep one instance of
+        # Typen (anschiessend alle)
         types_to_keep = [
             'IfcWall', 'IfcDoor', 'IfcWindow', 'IfcSlab', 'IfcColumn', 'IfcBeam',
             'IfcRoof', 'IfcStair', 'IfcRamp', 'IfcSpace', 'IfcZone', 'IfcCovering'
         ]
 
-        # Dictionary to track added types
         added_types = {type_name: False for type_name in types_to_keep}
 
         for type_name in types_to_keep:
@@ -78,14 +74,14 @@ def clean_ifc(ifc_file_path, printout=False):
                 new_instance = new_ifc_model.add(instance)
                 added_types[type_name] = True
 
-                # Copy all attributes and property sets
+                # alle attribute der zu behaltenden Instanz hinzugügen.
                 for attribute in instance.__dict__:
                     setattr(new_instance, attribute, getattr(instance, attribute))
                 for pset in ifcopenshell.util.element.get_psets(instance):
                     ifcopenshell.util.element.add_pset(new_ifc_model, new_instance, pset)
         
         if printout:
-            print(f"Cleaned IFC file created with types: {list(added_types.keys())}")
+            print(f"IFC bereinigt, entahltene typen: {list(added_types.keys())}")
         return new_ifc_model
 
     except FileNotFoundError:
@@ -96,16 +92,16 @@ def clean_ifc(ifc_file_path, printout=False):
         return ifcopenshell.file()
 
 
-def get_element_types(ifc_path, printout=False):
+def get_element_types(ifc_path, printout=False) -> list:
     """
-    Get a list of all element types present in an IFC file.
-
+    Listet alle elemelnt typen in IFC auf.
+    
     Parameters:
-    ifc_path (str): Path to the IFC file.
-    printout (bool): Whether to print out debug information.
-
+    ifc_file_path (str): Pfad zum IFC-file
+    printout (bool): Debug Informationen ausgeben oder nicht
+    
     Returns:
-    list: A list of element types.
+    list of element types.
     """
     try:
         ifc_file = ifcopenshell.open(ifc_path)
@@ -125,15 +121,15 @@ def get_element_types(ifc_path, printout=False):
 
 def get_psets_for_entity(ifc_path, entity_type, printout=False):
     """
-    Get a list of all property sets (psets) that an entity type can have in an IFC file.
-
+    Listet alle Psets für einen entity-typen in IFC auf.
+    
     Parameters:
-    ifc_path (str): Path to the IFC file.
-    entity_type (str): IFC entity type (e.g., IfcSlab, IfcWall).
-    printout (bool): Whether to print out debug information.
-
+    ifc_file_path (str): Pfad zum IFC-file
+    entity_type (str) 
+    printout (bool): Debug Informationen ausgeben oder nicht
+    
     Returns:
-    list: A list of property sets for the specified entity type.
+    list of element types.
     """
     try:
         ifc_file = ifcopenshell.open(ifc_path)
