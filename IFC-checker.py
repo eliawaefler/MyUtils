@@ -125,7 +125,7 @@ def get_psets_for_entity(ifc_path, entity_type, printout=False):
     
     Parameters:
     ifc_file_path (str): Pfad zum IFC-file
-    entity_type (str) 
+    entity_type (str): IFC entity typ, (z.B. IfcSlab, IfcWall)
     printout (bool): Debug Informationen ausgeben oder nicht
     
     Returns:
@@ -152,15 +152,14 @@ def get_psets_for_entity(ifc_path, entity_type, printout=False):
 
 def get_properties_in_pset(ifc_path, pset_name, printout=False):
     """
-    Get a list of all properties in a given property set (pset) in an IFC file.
-
+    Liste von Attributen in einem PSET.
     Parameters:
-    ifc_path (str): Path to the IFC file.
-    pset_name (str): Name of the property set.
-    printout (bool): Whether to print out debug information.
+    ifc_file_path (str): Pfad zum IFC-file
+    pset_name (str): PSET
+    printout (bool): Debug Informationen ausgeben oder nicht
 
     Returns:
-    list: A list of properties in the specified property set.
+    list der properties des PSETS
     """
     try:
         ifc_file = ifcopenshell.open(ifc_path)
@@ -181,17 +180,17 @@ def get_properties_in_pset(ifc_path, pset_name, printout=False):
 
 def get_property_value(ifc_path, entity_type, pset_name, property_name, printout=False):
     """
-    Get the value of a specific property from a given entity type and property set in an IFC file.
-
-    Parameters:
-    ifc_path (str): Path to the IFC file.
-    entity_type (str): IFC entity type (e.g., IfcSlab, IfcWall).
-    pset_name (str): Name of the property set.
-    property_name (str): Name of the property.
-    printout (bool): Whether to print out debug information.
-
+    Eigenschaft abrufen.
+    
+     Parameters:
+    ifc_file_path (str): Pfad zum IFC-file
+    entity_type (str): IFC entity typ, (z.B. IfcSlab, IfcWall)
+    pset_name (str): PSET
+    property_name (str): Name des Property.
+    printout (bool): Debug Informationen ausgeben oder nicht
+    
     Returns:
-    Any: The value of the specified property.
+    Any: den Wert der Property.
     """
     try:
         ifc_file = ifcopenshell.open(ifc_path)
@@ -219,12 +218,12 @@ def get_property_value(ifc_path, entity_type, pset_name, property_name, printout
 
 def compare_ifcs(ifc_path1, ifc_path2, printout=False):
     """
-    Compare two IFC files and calculate a similarity score based on the presence and values of properties.
-
+    Zwei IFC's vergleichen und einen similiarity-score berechnen.
+    
     Parameters:
-    ifc_path1 (str): Path to the first IFC file.
-    ifc_path2 (str): Path to the second IFC file.
-    printout (bool): Whether to print out debug information.
+    ifc_path1 (str): Pfad zum ersten IFC-file.
+    ifc_path2 (str): Pfad zum zweiten IFC-file
+    printout (bool): Debug Informationen ausgeben oder nicht
 
     Returns:
     dict: A dictionary with requests made, matches, and similarity score.
