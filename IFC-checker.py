@@ -226,7 +226,7 @@ def compare_ifcs(ifc_path1, ifc_path2, printout=False):
     printout (bool): Debug Informationen ausgeben oder nicht
 
     Returns:
-    dict: A dictionary with requests made, matches, and similarity score.
+    dict: alle Abfragen, die matches, similarity score.
     """
     element_types = get_element_types(ifc_path1, printout)
     
