@@ -1,41 +1,5 @@
 import ifcopenshell
 
-
-def load_ifc(file_path):
-    """ Lädt eine IFC-Datei und gibt das Modell zurück. """
-    return ifcopenshell.open(file_path)
-
-
-def extract_structure(ifc_model):
-    """ Extrahiert relevante Strukturen und Daten aus einem IFC-Modell. """
-    elements = {}
-    for element in ifc_model.by_type('IfcProduct'):
-        element_type = element.is_a()
-        if element_type not in elements:
-            elements[element_type] = []
-        elements[element_type].append(element)
-    return elements
-
-
-def compare_ifc_models(model1, model2):
-    """ Vergleicht zwei IFC-Modelle auf ihre Ähnlichkeit basierend auf ihrer Struktur. """
-    structure1 = extract_structure(model1)
-    structure2 = extract_structure(model2)
-    
-    # Ähnlichkeit basierend auf der Anzahl der gleichen Typen
-    score = 0
-    total_types = set(structure1.keys()).union(set(structure2.keys()))
-    for type_name in total_types:
-        if type_name in structure1 and type_name in structure2:
-            score += min(len(structure1[type_name]), len(structure2[type_name]))
-        elif type_name in structure1 or type_name in structure2:
-            score -= 1
-    
-    max_score = sum(max(len(structure1.get(t, [])), len(structure2.get(t, []))) for t in total_types)
-    similarity = score / max_score if max_score > 0 else 0
-    return similarity
-
-
 def clean_ifc(ifc_file_path, printout=False):
     """
     Bereinigt ein IFC, indem es nur eine Instanz pro Typ zulässt. alle Psets und Attribute bleiben dem Typ zugeordnet.
@@ -218,7 +182,7 @@ def get_property_value(ifc_path, entity_type, pset_name, property_name, printout
 
 def compare_ifcs(ifc_path1, ifc_path2, printout=False):
     """
-    Zwei IFC's vergleichen und einen similiarity-score berechnen.
+    Zwei IFC's vergleichen und einen similiarity-score in Prozent berechnen.
     
     Parameters:
     ifc_path1 (str): Pfad zum ersten IFC-file.
@@ -226,7 +190,7 @@ def compare_ifcs(ifc_path1, ifc_path2, printout=False):
     printout (bool): Debug Informationen ausgeben oder nicht
 
     Returns:
-    dict: alle Abfragen, die matches, similarity score.
+    dict: Anzahl Abfragen (int), Anzahl Matches(int), similarity score in %.
     """
     element_types = get_element_types(ifc_path1, printout)
     
@@ -277,9 +241,44 @@ def compare_ifcs(ifc_path1, ifc_path2, printout=False):
     }
 
 
+def load_ifc(file_path):
+    """ Lädt eine IFC-Datei und gibt das Modell zurück. """
+    return ifcopenshell.open(file_path)
+
+
+def extract_structure(ifc_model):
+    """ Extrahiert relevante Strukturen und Daten aus einem IFC-Modell. """
+    elements = {}
+    for element in ifc_model.by_type('IfcProduct'):
+        element_type = element.is_a()
+        if element_type not in elements:
+            elements[element_type] = []
+        elements[element_type].append(element)
+    return elements
+
+
+def compare_ifc_models(model1, model2):
+    """ Vergleicht zwei IFC-Modelle auf ihre Ähnlichkeit basierend auf ihrer Struktur. """
+    structure1 = extract_structure(model1)
+    structure2 = extract_structure(model2)
+    
+    # Ähnlichkeit basierend auf der Anzahl der gleichen Typen
+    score = 0
+    total_types = set(structure1.keys()).union(set(structure2.keys()))
+    for type_name in total_types:
+        if type_name in structure1 and type_name in structure2:
+            score += min(len(structure1[type_name]), len(structure2[type_name]))
+        elif type_name in structure1 or type_name in structure2:
+            score -= 1
+    
+    max_score = sum(max(len(structure1.get(t, [])), len(structure2.get(t, []))) for t in total_types)
+    similarity = score / max_score if max_score > 0 else 0
+    return similarity
+
+
 def main():
-    ifc_file1 = 'path/to/your/first.ifc'
-    ifc_file2 = 'path/to/your/second.ifc'
+    ifc_file1 = 'pathfirst.ifc'
+    ifc_file2 = 'pathsecond.ifc'
 
     model1 = load_ifc(ifc_file1)
     model2 = load_ifc(ifc_file2)
@@ -287,7 +286,7 @@ def main():
     similarity_score = compare_ifc_models(model1, model2)
     print(f"Ähnlichkeit: {similarity_score:.2f}")
 
-    result = compare_ifcs("path/to/your1.ifc", "path/to/your2.ifc", printout=True)
+    result = compare_ifcs(ifc_file1, ifc_file2, printout=True)
     print(result)
 
 
