@@ -1,8 +1,10 @@
 import ifcopenshell
 
+
 def load_ifc(file_path):
     """ Lädt eine IFC-Datei und gibt das Modell zurück. """
     return ifcopenshell.open(file_path)
+
 
 def extract_structure(ifc_model):
     """ Extrahiert relevante Strukturen und Daten aus einem IFC-Modell. """
@@ -14,12 +16,13 @@ def extract_structure(ifc_model):
         elements[element_type].append(element)
     return elements
 
+
 def compare_ifc_models(model1, model2):
     """ Vergleicht zwei IFC-Modelle auf ihre Ähnlichkeit basierend auf ihrer Struktur. """
     structure1 = extract_structure(model1)
     structure2 = extract_structure(model2)
     
-    # Einfacher Ähnlichkeitswert basierend auf der Anzahl der gleichen Typen
+    # Ähnlichkeit basierend auf der Anzahl der gleichen Typen
     score = 0
     total_types = set(structure1.keys()).union(set(structure2.keys()))
     for type_name in total_types:
@@ -32,19 +35,8 @@ def compare_ifc_models(model1, model2):
     similarity = score / max_score if max_score > 0 else 0
     return similarity
 
-  def main():
-    ifc_file1 = 'path/to/your/first.ifc'
-    ifc_file2 = 'path/to/your/second.ifc'
-    
-    model1 = load_ifc(ifc_file1)
-    model2 = load_ifc(ifc_file2)
-    
-    similarity_score = compare_ifc_models(model1, model2)
-    print(f"Ähnlichkeitswert: {similarity_score:.2f}")
 
-import ifcopenshell
-
-def clean_ifc(ifc_file_path, printout=False):
+def clean_ifc(ifc_file_path: str, printout=False):
     """
     Clean an IFC file by creating a new IFC file that contains only one instance
     of each specified element type, preserving their attributes and property sets.
@@ -216,9 +208,11 @@ def get_property_value(ifc_path, entity_type, pset_name, property_name, printout
                             for prop in pset.HasProperties:
                                 if prop.Name == property_name:
                                     if printout:
-                                        print(f"Value of {property_name} in {pset_name} for {entity_type}: {prop.NominalValue}")
+                                        print(f"Value of {property_name} in {pset_name} "
+                                              f"for {entity_type}: {prop.NominalValue}")
                                     return prop.NominalValue
-        raise ValueError(f"Property '{property_name}' not found in pset '{pset_name}' for entity type '{entity_type}'")
+        raise ValueError(f"Property '{property_name}' not found in pset '{pset_name}' "
+                         f"for entity type '{entity_type}'")
     except FileNotFoundError:
         print(f"File not found: {ifc_path}")
         raise ValueError(f"File not found: {ifc_path}")
@@ -288,6 +282,19 @@ def compare_ifcs(ifc_path1, ifc_path2, printout=False):
     }
 
 
-if __name__ == "__main__":
+def main():
+    ifc_file1 = 'path/to/your/first.ifc'
+    ifc_file2 = 'path/to/your/second.ifc'
+
+    model1 = load_ifc(ifc_file1)
+    model2 = load_ifc(ifc_file2)
+
+    similarity_score = compare_ifc_models(model1, model2)
+    print(f"Ähnlichkeit: {similarity_score:.2f}")
+
     result = compare_ifcs("path/to/your1.ifc", "path/to/your2.ifc", printout=True)
     print(result)
+
+
+if __name__ == "__main__":
+    main()
