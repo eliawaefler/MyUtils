@@ -1,15 +1,23 @@
 from sentence_transformers import SentenceTransformer
-model = SentenceTransformer('all-MiniLM-L6-v2')  # Choose a model that suits your needs
+import numpy as np
+import json
+
+model = SentenceTransformer('all-MiniLM-L6-v2')
 
 
 def get_embedding(text: str) -> list:
-    return model.encode(text)
+    return model.encode(text).tolist()
 
 
-def get_embeddings(texts: list[str]) -> list:
-    return [get_embedding(t) for t in texts]
+def get_embeddings(texts: list[str]) -> dict:
+    return {t: get_embedding(t) for t in texts}
+
+
+def list_to_vecstore(in_file):
+    with open(in_file, "r") as f:
+        with open(in_file + "_vecstore", "w") as newfile:
+            json.dump(get_embeddings(f.readlines()), newfile)
 
 
 if __name__ == '__main__':
-    embedding = get_embedding("any text to embed")
-    print(len(embedding))
+    list_to_vecstore("kbob")
