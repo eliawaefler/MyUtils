@@ -1,74 +1,34 @@
 import ifcopenshell
 
-
-def load_ifc(file_path):
-    """ Lädt eine IFC-Datei und gibt das Modell zurück. """
-    return ifcopenshell.open(file_path)
-
-
-def extract_structure(ifc_model):
-    """ Extrahiert relevante Strukturen und Daten aus einem IFC-Modell. """
-    elements = {}
-    for element in ifc_model.by_type('IfcProduct'):
-        element_type = element.is_a()
-        if element_type not in elements:
-            elements[element_type] = []
-        elements[element_type].append(element)
-    return elements
-
-
-def compare_ifc_models(model1, model2):
-    """ Vergleicht zwei IFC-Modelle auf ihre Ähnlichkeit basierend auf ihrer Struktur. """
-    structure1 = extract_structure(model1)
-    structure2 = extract_structure(model2)
-    
-    # Ähnlichkeit basierend auf der Anzahl der gleichen Typen
-    score = 0
-    total_types = set(structure1.keys()).union(set(structure2.keys()))
-    for type_name in total_types:
-        if type_name in structure1 and type_name in structure2:
-            score += min(len(structure1[type_name]), len(structure2[type_name]))
-        elif type_name in structure1 or type_name in structure2:
-            score -= 1
-    
-    max_score = sum(max(len(structure1.get(t, [])), len(structure2.get(t, []))) for t in total_types)
-    similarity = score / max_score if max_score > 0 else 0
-    return similarity
-
-
 def clean_ifc(ifc_file_path, printout=False):
     """
-    Clean an IFC file by creating a new IFC file that contains only one instance
-    of each specified element type, preserving their attributes and property sets.
-
+    Bereinigt ein IFC, indem es nur eine Instanz pro Typ zulässt. alle Psets und Attribute bleiben dem Typ zugeordnet.
+    
+    
     Parameters:
-    ifc_file_path (str): Path to the input IFC file.
-    printout (bool): Whether to print out debug information.
+    ifc_file_path (str): Pfad zum IFC-file
+    printout (bool): Debug Informationen ausgeben oder nicht
 
     Returns:
-    ifcopenshell.file: A new IFC model containing one instance of each specified element type.
+    ifcopenshell.file: neues IFC model welches nur eine Instanz von jedem Typ hat.
     """
     try:
-        # Open the IFC file
         ifc_model = ifcopenshell.open(ifc_file_path)
-
-        # Create a new empty IFC file
         new_ifc_model = ifcopenshell.file()
 
-        # Add the necessary header information
+        # header
         for entity in ifc_model.by_type('IfcProject'):
             new_ifc_model.createIfcProject(
                 entity.GlobalId, entity.OwnerHistory, entity.Name, entity.Description,
                 entity.ObjectType, entity.LongName, entity.Phase
             )
 
-        # Define the types to keep one instance of
+        # Typen (anschiessend alle)
         types_to_keep = [
             'IfcWall', 'IfcDoor', 'IfcWindow', 'IfcSlab', 'IfcColumn', 'IfcBeam',
             'IfcRoof', 'IfcStair', 'IfcRamp', 'IfcSpace', 'IfcZone', 'IfcCovering'
         ]
 
-        # Dictionary to track added types
         added_types = {type_name: False for type_name in types_to_keep}
 
         for type_name in types_to_keep:
@@ -78,14 +38,14 @@ def clean_ifc(ifc_file_path, printout=False):
                 new_instance = new_ifc_model.add(instance)
                 added_types[type_name] = True
 
-                # Copy all attributes and property sets
+                # alle attribute der zu behaltenden Instanz hinzugügen.
                 for attribute in instance.__dict__:
                     setattr(new_instance, attribute, getattr(instance, attribute))
                 for pset in ifcopenshell.util.element.get_psets(instance):
                     ifcopenshell.util.element.add_pset(new_ifc_model, new_instance, pset)
         
         if printout:
-            print(f"Cleaned IFC file created with types: {list(added_types.keys())}")
+            print(f"IFC bereinigt, entahltene typen: {list(added_types.keys())}")
         return new_ifc_model
 
     except FileNotFoundError:
@@ -96,16 +56,16 @@ def clean_ifc(ifc_file_path, printout=False):
         return ifcopenshell.file()
 
 
-def get_element_types(ifc_path, printout=False):
+def get_element_types(ifc_path, printout=False) -> list:
     """
-    Get a list of all element types present in an IFC file.
-
+    Listet alle elemelnt typen in IFC auf.
+    
     Parameters:
-    ifc_path (str): Path to the IFC file.
-    printout (bool): Whether to print out debug information.
-
+    ifc_file_path (str): Pfad zum IFC-file
+    printout (bool): Debug Informationen ausgeben oder nicht
+    
     Returns:
-    list: A list of element types.
+    list of element types.
     """
     try:
         ifc_file = ifcopenshell.open(ifc_path)
@@ -125,15 +85,15 @@ def get_element_types(ifc_path, printout=False):
 
 def get_psets_for_entity(ifc_path, entity_type, printout=False):
     """
-    Get a list of all property sets (psets) that an entity type can have in an IFC file.
-
+    Listet alle Psets für einen entity-typen in IFC auf.
+    
     Parameters:
-    ifc_path (str): Path to the IFC file.
-    entity_type (str): IFC entity type (e.g., IfcSlab, IfcWall).
-    printout (bool): Whether to print out debug information.
-
+    ifc_file_path (str): Pfad zum IFC-file
+    entity_type (str): IFC entity typ, (z.B. IfcSlab, IfcWall)
+    printout (bool): Debug Informationen ausgeben oder nicht
+    
     Returns:
-    list: A list of property sets for the specified entity type.
+    list of element types.
     """
     try:
         ifc_file = ifcopenshell.open(ifc_path)
@@ -156,15 +116,14 @@ def get_psets_for_entity(ifc_path, entity_type, printout=False):
 
 def get_properties_in_pset(ifc_path, pset_name, printout=False):
     """
-    Get a list of all properties in a given property set (pset) in an IFC file.
-
+    Liste von Attributen in einem PSET.
     Parameters:
-    ifc_path (str): Path to the IFC file.
-    pset_name (str): Name of the property set.
-    printout (bool): Whether to print out debug information.
+    ifc_file_path (str): Pfad zum IFC-file
+    pset_name (str): PSET
+    printout (bool): Debug Informationen ausgeben oder nicht
 
     Returns:
-    list: A list of properties in the specified property set.
+    list der properties des PSETS
     """
     try:
         ifc_file = ifcopenshell.open(ifc_path)
@@ -185,17 +144,17 @@ def get_properties_in_pset(ifc_path, pset_name, printout=False):
 
 def get_property_value(ifc_path, entity_type, pset_name, property_name, printout=False):
     """
-    Get the value of a specific property from a given entity type and property set in an IFC file.
-
-    Parameters:
-    ifc_path (str): Path to the IFC file.
-    entity_type (str): IFC entity type (e.g., IfcSlab, IfcWall).
-    pset_name (str): Name of the property set.
-    property_name (str): Name of the property.
-    printout (bool): Whether to print out debug information.
-
+    Eigenschaft abrufen.
+    
+     Parameters:
+    ifc_file_path (str): Pfad zum IFC-file
+    entity_type (str): IFC entity typ, (z.B. IfcSlab, IfcWall)
+    pset_name (str): PSET
+    property_name (str): Name des Property.
+    printout (bool): Debug Informationen ausgeben oder nicht
+    
     Returns:
-    Any: The value of the specified property.
+    Any: den Wert der Property.
     """
     try:
         ifc_file = ifcopenshell.open(ifc_path)
@@ -223,15 +182,15 @@ def get_property_value(ifc_path, entity_type, pset_name, property_name, printout
 
 def compare_ifcs(ifc_path1, ifc_path2, printout=False):
     """
-    Compare two IFC files and calculate a similarity score based on the presence and values of properties.
-
+    Zwei IFC's vergleichen und einen similiarity-score in Prozent berechnen.
+    
     Parameters:
-    ifc_path1 (str): Path to the first IFC file.
-    ifc_path2 (str): Path to the second IFC file.
-    printout (bool): Whether to print out debug information.
+    ifc_path1 (str): Pfad zum ersten IFC-file.
+    ifc_path2 (str): Pfad zum zweiten IFC-file
+    printout (bool): Debug Informationen ausgeben oder nicht
 
     Returns:
-    dict: A dictionary with requests made, matches, and similarity score.
+    dict: Anzahl Abfragen (int), Anzahl Matches(int), similarity score in %.
     """
     element_types = get_element_types(ifc_path1, printout)
     
@@ -282,9 +241,44 @@ def compare_ifcs(ifc_path1, ifc_path2, printout=False):
     }
 
 
+def load_ifc(file_path):
+    """ Lädt eine IFC-Datei und gibt das Modell zurück. """
+    return ifcopenshell.open(file_path)
+
+
+def extract_structure(ifc_model):
+    """ Extrahiert relevante Strukturen und Daten aus einem IFC-Modell. """
+    elements = {}
+    for element in ifc_model.by_type('IfcProduct'):
+        element_type = element.is_a()
+        if element_type not in elements:
+            elements[element_type] = []
+        elements[element_type].append(element)
+    return elements
+
+
+def compare_ifc_models(model1, model2):
+    """ Vergleicht zwei IFC-Modelle auf ihre Ähnlichkeit basierend auf ihrer Struktur. """
+    structure1 = extract_structure(model1)
+    structure2 = extract_structure(model2)
+    
+    # Ähnlichkeit basierend auf der Anzahl der gleichen Typen
+    score = 0
+    total_types = set(structure1.keys()).union(set(structure2.keys()))
+    for type_name in total_types:
+        if type_name in structure1 and type_name in structure2:
+            score += min(len(structure1[type_name]), len(structure2[type_name]))
+        elif type_name in structure1 or type_name in structure2:
+            score -= 1
+    
+    max_score = sum(max(len(structure1.get(t, [])), len(structure2.get(t, []))) for t in total_types)
+    similarity = score / max_score if max_score > 0 else 0
+    return similarity
+
+
 def main():
-    ifc_file1 = 'path/to/your/first.ifc'
-    ifc_file2 = 'path/to/your/second.ifc'
+    ifc_file1 = 'pathfirst.ifc'
+    ifc_file2 = 'pathsecond.ifc'
 
     model1 = load_ifc(ifc_file1)
     model2 = load_ifc(ifc_file2)
@@ -292,7 +286,7 @@ def main():
     similarity_score = compare_ifc_models(model1, model2)
     print(f"Ähnlichkeit: {similarity_score:.2f}")
 
-    result = compare_ifcs("path/to/your1.ifc", "path/to/your2.ifc", printout=True)
+    result = compare_ifcs(ifc_file1, ifc_file2, printout=True)
     print(result)
 
 
