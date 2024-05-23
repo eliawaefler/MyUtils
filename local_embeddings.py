@@ -20,4 +20,5 @@ def list_to_vecstore(in_file):
 
 
 if __name__ == '__main__':
-    list_to_vecstore("kbob")
+    #list_to_vecstore("kbob")
+    print(get_embedding("Dieser Satz wird vektorisiert."))
