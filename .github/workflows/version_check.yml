@@ -1,0 +1,30 @@
+name: Version Check
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Runs every Sunday at midnight
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Check MyUtils version
+        run: |
+          python -c "
+          import requests
+          url = 'https://api.github.com/repos/yourusername/MyUtils/releases/latest'
+          response = requests.get(url)
+          latest_version = response.json().get('tag_name')
+          print(f'Latest MyUtils version: {latest_version}')
+          "
