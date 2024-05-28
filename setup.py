@@ -9,5 +9,5 @@ setup(
     description='A collection of utility functions for multiple projects',
     author='Elia Wäfler',
     author_email='elia.waefler@gmail.com',
-    url='https://github.com/eliawaefler/MyUtils',
+    url='https://github.com/eliawaefler/MyUtils'
 )
