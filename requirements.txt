@@ -1,6 +1,0 @@
-setuptools~=57.4.0
-requests~=2.31.0
-openai~=1.23.6
-ifcopenshell~=0.7.0.231218
-neo4j~=5.20.0
-numpy~=1.26.4
