@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='MyUtils',
-    version='0.1.0',  # Update this version number as needed
+    version='0.2.0',  # Update this version number as needed
     packages=find_packages(),
     install_requires=[
         'setuptools~=57.4.0',
