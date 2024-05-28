@@ -4,7 +4,7 @@ import requests
 
 
 def get_latest_version():
-    url = 'https://api.github.com/repos/yourusername/MyUtils/releases/latest'
+    url = 'https://api.github.com/repos/eliawaefler/MyUtils/releases/latest'
     response = requests.get(url)
     latest_version = response.json().get('tag_name')
     return latest_version
